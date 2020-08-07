@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket聊天室</title>
+    <style>
+        #responseText {
+            margin-bottom: 1rem;
+            width: 300px;
+            min-height: 300px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>聊天室</h1>
+    <div id="responseText"></div>
+    <input type="text" id="textId" value="">
+    <input onclick="sendText(document.getElementById('textId').value);" value="發送訊息" type="button" />
+    <script>
+        window.onload = function () {
+            // const ws = new WebSocket('ws://localhost:8080/')
+            const ws = new WebSocket('ws://192.168.2.27:8080/')
+            const responseText = document.getElementById('responseText')
+            console.log(ws)
+
+            const textFn = (value) => {
+                const list = document.createElement('DIV')
+                const text = document.createTextNode(value)
+                list.appendChild(text)
+                responseText.appendChild(list)
+            }
+
+            ws.addEventListener('open', function () {
+                console.log(this)
+                console.log('連結已建立')
+                textFn('連結已建立')
+            })
+
+            // ws.addEventListener('message', function (e) {
+            //     const msg = JSON.parse(e.data)
+            //     console.log('ws訊息傳遞', msg)
+            //     textFn(msg)
+            // })
+
+            ws.onmessage = function(e) {
+                const str = e.data.replace(/["]/g, '')
+                textFn(str)
+                document.getElementById('responseText').scrollTop = 9999999;
+            }
+
+            ws.addEventListener('close', function (e) {
+                console.log('WebSocket已經關閉')
+                textFn('WebSocket已經關閉')
+            })
+
+            sendText = (text) => {
+                ws.send(JSON.stringify(text))
+                document.getElementById('textId').value = ''
+            }
+        }
+    </script>
+</body>
+</html>
